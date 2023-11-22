@@ -3,12 +3,15 @@
 <head>
     <title>Meu Site Hello World</title>
     <script type="module">
+        // Importando as funções necessárias do Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
+        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
 
+        // Configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBspYz-fSAR1JGlbe-w2c3TV1wEyS0COeE",
             authDomain: "getuserinfo-shuno.firebaseapp.com",
+            databaseURL: "SUA_DATABASE_URL", // Adicione a URL do seu Realtime Database aqui
             projectId: "getuserinfo-shuno",
             storageBucket: "getuserinfo-shuno.appspot.com",
             messagingSenderId: "1017603430075",
@@ -16,43 +19,54 @@
             measurementId: "G-CNFNLLD8C6"
         };
 
+        // Inicializando o Firebase
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const database = getDatabase(app);
 
-        function sendDataToFirestore(data) {
-            try {
-                const docRef = await addDoc(collection(db, "visitors"), data);
-                console.log("Document written with ID: ", docRef.id);
-            } catch (e) {
-                console.error("Error adding document: ", e);
-            }
+        // Função para enviar dados para o Realtime Database
+        function sendDataToRealtimeDatabase(data) {
+            const dbRef = ref(database, 'visitors');
+            push(dbRef, data, function(error) {
+                if (error) {
+                    console.error("Dados não foram salvos.", error);
+                } else {
+                    console.log("Dados salvos com sucesso.");
+                }
+            });
         }
-    </script>
-    <script>
+
+        // Código da API VisitorAPI
         var VisitorAPI = function(t, e, a) {
             var s = new XMLHttpRequest();
             s.onreadystatechange = function() {
-                var t;
-                s.readyState === XMLHttpRequest.DONE && (200 === (t = JSON.parse(s.responseText)).status ? e(t.data) : a(t.status, t.result));
+                if (s.readyState === XMLHttpRequest.DONE) {
+                    if (s.status === 200) {
+                        var data = JSON.parse(s.responseText);
+                        console.log("Dados da API:", data);
+                        e(data);
+                    } else {
+                        a(s.status, s.statusText);
+                    }
+                }
             };
             s.open("GET", "https://api.visitorapi.com/api/?pid=" + t);
             s.send(null);
         };
-    </script>
-</head>
-<body>
-    <h1>Hello World!</h1>
-    <script>
+
+        // Chamada da API e envio dos dados para o Firebase
         VisitorAPI(
             "p53oy0LRsYVI5KEmIDJw",
             function(data) { 
                 console.log(data);
-                sendDataToFirestore(data); // Envie os dados para o Firestore
+                sendDataToRealtimeDatabase(data); // Envie os dados para o Firebase
             },
             function(errorCode, errorMessage) { 
-                console.log(errorCode, errorMessage); 
+                console.log("Erro na API:", errorCode, errorMessage); 
             }
         );
     </script>
+</head>
+<body>
+    <h1>Hello World!</h1>
 </body>
 </html>
