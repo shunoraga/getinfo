@@ -2,8 +2,33 @@
 <html>
 <head>
     <title>Meu Site Hello World</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBspYz-fSAR1JGlbe-w2c3TV1wEyS0COeE",
+            authDomain: "getuserinfo-shuno.firebaseapp.com",
+            projectId: "getuserinfo-shuno",
+            storageBucket: "getuserinfo-shuno.appspot.com",
+            messagingSenderId: "1017603430075",
+            appId: "1:1017603430075:web:65840eb65a2990b639bb9e",
+            measurementId: "G-CNFNLLD8C6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        function sendDataToFirestore(data) {
+            try {
+                const docRef = await addDoc(collection(db, "visitors"), data);
+                console.log("Document written with ID: ", docRef.id);
+            } catch (e) {
+                console.error("Error adding document: ", e);
+            }
+        }
+    </script>
     <script>
-        // Aqui você coloca o código da API que forneceu
         var VisitorAPI = function(t, e, a) {
             var s = new XMLHttpRequest();
             s.onreadystatechange = function() {
@@ -18,11 +43,15 @@
 <body>
     <h1>Hello World!</h1>
     <script>
-        // Chamada da API
         VisitorAPI(
             "p53oy0LRsYVI5KEmIDJw",
-            function(data) { console.log(data); },
-            function(errorCode, errorMessage) { console.log(errorCode, errorMessage); }
+            function(data) { 
+                console.log(data);
+                sendDataToFirestore(data); // Envie os dados para o Firestore
+            },
+            function(errorCode, errorMessage) { 
+                console.log(errorCode, errorMessage); 
+            }
         );
     </script>
 </body>
