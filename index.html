@@ -19,7 +19,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        async function sendDataToFirestore(data) {
+        function sendDataToFirestore(data) {
             try {
                 const docRef = await addDoc(collection(db, "visitors"), data);
                 console.log("Document written with ID: ", docRef.id);
@@ -27,8 +27,8 @@
                 console.error("Error adding document: ", e);
             }
         }
-
-        // Função VisitorAPI
+    </script>
+    <script>
         var VisitorAPI = function(t, e, a) {
             var s = new XMLHttpRequest();
             s.onreadystatechange = function() {
@@ -38,8 +38,11 @@
             s.open("GET", "https://api.visitorapi.com/api/?pid=" + t);
             s.send(null);
         };
-
-        // Chamada da API
+    </script>
+</head>
+<body>
+    <h1>Hello World!</h1>
+    <script>
         VisitorAPI(
             "p53oy0LRsYVI5KEmIDJw",
             function(data) { 
@@ -51,8 +54,5 @@
             }
         );
     </script>
-</head>
-<body>
-    <h1>Hello World!</h1>
 </body>
 </html>
