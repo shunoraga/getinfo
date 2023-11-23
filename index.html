@@ -7,16 +7,20 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
         import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
 
-        // Configuração do Firebase
         const firebaseConfig = {
-            // Suas configurações do Firebase
+            apiKey: "AIzaSyBspYz-fSAR1JGlbe-w2c3TV1wEyS0COeE",
+            authDomain: "getuserinfo-shuno.firebaseapp.com",
+            databaseURL: "https://getuserinfo-shuno-default-rtdb.firebaseio.com/",
+            projectId: "getuserinfo-shuno",
+            storageBucket: "getuserinfo-shuno.appspot.com",
+            messagingSenderId: "1017603430075",
+            appId: "1:1017603430075:web:65840eb65a2990b639bb9e",
+            measurementId: "G-CNFNLLD8C6"
         };
 
-        // Inicializando o Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // Função para enviar dados para o Realtime Database
         function sendDataToRealtimeDatabase(data) {
             const dbRef = ref(database, 'visitors');
             push(dbRef, data, function(error) {
@@ -28,49 +32,48 @@
             });
         }
 
-        // Funções de Geolocalização
-        function getLocation() {
+        function getLocationAndSendData(apiData) {
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition, showError);
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var locationData = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    };
+                    var completeData = { ...apiData, ...locationData, ...WURFL };
+                    sendDataToRealtimeDatabase(completeData);
+                }, function(error) {
+                    console.error("Erro na Geolocalização: ", error);
+                    sendDataToRealtimeDatabase({ ...apiData, ...WURFL });
+                });
             } else {
                 console.log("Geolocalização não é suportada por este navegador.");
+                sendDataToRealtimeDatabase({ ...apiData, ...WURFL });
             }
         }
 
-        function showPosition(position) {
-            var locationData = {
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude
-            };
-            sendDataToRealtimeDatabase(locationData);
-        }
-
-        function showError(error) {
-            // Tratamento de erros de geolocalização
-        }
-
-        // Chamada da API VisitorAPI
         var VisitorAPI = function(t, e, a) {
-            // Implementação da API VisitorAPI
+            var s = new XMLHttpRequest();
+            s.onreadystatechange = function() {
+                if (s.readyState === XMLHttpRequest.DONE) {
+                    if (s.status === 200) {
+                        var data = JSON.parse(s.responseText);
+                        console.log("Dados da API:", data);
+                        e(data);
+                    } else {
+                        a(s.status, s.statusText);
+                    }
+                }
+            };
+            s.open("GET", "https://api.visitorapi.com/api/?pid=" + t);
+            s.send(null);
         };
 
-        // Chamada da API e envio dos dados para o Firebase
         VisitorAPI(
             "p53oy0LRsYVI5KEmIDJw",
-            function(data) { 
-                // Coletando dados do WURFL.js
-                var deviceInfo = {
-                    completeDeviceName: WURFL.complete_device_name,
-                    formFactor: WURFL.form_factor,
-                    isMobile: WURFL.is_mobile
-                };
-
-                var completeData = { ...data, ...deviceInfo };
-                console.log(completeData);
-                sendDataToRealtimeDatabase(completeData);
-                getLocation(); // Solicitar geolocalização
+            function(data) {
+                getLocationAndSendData(data);
             },
-            function(errorCode, errorMessage) { 
+            function(errorCode, errorMessage) {
                 console.log("Erro na API:", errorCode, errorMessage); 
             }
         );
