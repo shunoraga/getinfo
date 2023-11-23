@@ -42,4 +42,13 @@
   color: rgb(96, 96, 96);
   font-size: 13px;
   margin-top: var(--dl-space-space-halfunit);
+  text-align: center; /* Centraliza o texto */
+  padding: 0 10px; /* Adiciona um pouco de espaço nas laterais */
+  word-wrap: break-word; /* Quebra palavras longas que não cabem na linha */
+}
+
+@media (max-width: 768px) {
+  .home-text2 {
+    font-size: 12px; /* Reduz o tamanho da fonte para dispositivos móveis */
+  }
 }
